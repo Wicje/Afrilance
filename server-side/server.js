@@ -6,6 +6,7 @@
 import express from 'express';
 import cors from 'cors';
 import db from '.app/model/index.js';
+import { connectDB } from '.app/config/connectDB.config.js';
 import authRoutes from './app/routes/auth.routes.js';
 import userRoutes from './app/routes/user.routes.js';
 
@@ -38,21 +39,21 @@ app.use('/api/test', userRoutes);
 const PORT = process.env.PORT || 8080;
 
 // Connect to MongoDB and start the the server
-db.mongoose
-.connect('mongodb: //${db.config.HOST}:${db.config.PORT}/${db.config.DB}')
-.then(() => {
-    console.log('Successfully connected to MongoDB.');
+//db.mongoose
+//.connect('mongodb: //${db.config.HOST}:${db.config.PORT}/${db.config.DB}')
+//.then(() => {
+  //  console.log('Successfully connected to MongoDB.');
     
-    //Initialize roles in the database 
-    initial();
-    app.listen(PORT, () => {
+    ////Initialize roles in the database 
+    //initial();
+app.listen(PORT, () => {
         console.log('Server is running on PORT ${PORT}.');
-    });
-})
-.catch((err) => {
-    console.error('Connection error:', err);
-    process.exit();
-});
+    });// Is this meant to be here
+//})  // consider the commented picture
+//.catch((err) => {
+    //console.error('Connection error:', err);
+  //  process.exit();
+//});
 
 //Initial function to populate roles
 function initial() {
