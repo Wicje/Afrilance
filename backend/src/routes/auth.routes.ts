@@ -9,6 +9,8 @@ import {
   logout,
 } from "../controllers/auth.controllers";
 import { ensureAuthentication } from "../middlewares/auth.Middleware";
+import { RegisterData, AppUser, QueryData } from "../models/user.model";
+
 
 const router = express.Router();
 

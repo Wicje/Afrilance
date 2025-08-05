@@ -2,8 +2,8 @@
 import { Request, Response, NextFunction } from 'express';
 import passport from 'passport';
 import bcrypt from 'bcrypt';
-import { users } from '../models/types'; // adjust path based on your project structure
- 
+import { users } from '../models/user.model'; // adjust path based on your project structure
+import { AppUser, RegisterData, QueryData } from "../types/auth.types";
 
 export const register = async (
     req: Request<unknown, unknown, RegisterData>,
@@ -39,7 +39,7 @@ export const register = async (
      };
 
 
-export const login = (req: Request, res: Response, next) => {
+export const login = (req: Request, res: Response, next: NextFunction): void => {
   passport.authenticate(
     "local",
     (
@@ -72,7 +72,7 @@ export const googleAuth = passport.authenticate("google", { scope: ["profile", "
 
 export const googleAuthCallback = [
   passport.authenticate("google", { failureRedirect: "/login" }), // 
-  async (req, res) => { res.redirect("http://localhost:3001"); } // 
+  async (req: Request, res: Response, next: NextFunction): void => { res.redirect("http://localhost:3001"); } // 
 ];
 
 
@@ -106,7 +106,7 @@ export const me = async (
      };
 
 
-export const logout = async (req: Request, res: Response) => {
+export const logout = async (req: Request, res: Response, next: NextFunction): void => {
   req.logout((error) => {
     if (error) {
       return res.status(500).json({ error: `Something  went wrong` });
