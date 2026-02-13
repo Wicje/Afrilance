@@ -1,9 +1,9 @@
-
-// src/types/express.d.ts
-import { AppUser } from "./auth.types";
-
-declare global {
-  namespace Express {
-    interface User extends AppUser {}
+declare namespace Express {
+  export interface Request {
+    user?: {
+      id: string;
+      email: string;
+      type: string;
+    };
   }
 }

@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: afrilance_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: afrilance
+      POSTGRES_PASSWORD: afrilance123
+      POSTGRES_DB: afrilance
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - afrilance_net
+
+  rust_service:
+    build: ./rust-service
+    container_name: afrilance_rust
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      RUST_LOG: info
+    networks:
+      - afrilance_net
+
+  backend:
+    build: ./backend
+    container_name: afrilance_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - rust_service
+    env_file:
+      - ./backend/.env
+    networks:
+      - afrilance_net
+
+volumes:
+  postgres_data:
+
+networks:
+  afrilance_net:
+    driver: bridge

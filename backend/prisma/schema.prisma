@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  password      String
+  name          String
+  type          UserType      // FREELANCER or COMPANY
+  publicKey     String?       // only for companies (Ed25519 public key hex)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  jobs          Job[]         @relation("CompanyJobs")
+  applications  Application[]
+  skillTests    SkillTest[]
+  givenReviews  Review[]      @relation("Reviewer")
+  receivedReviews Review[]    @relation("Reviewee")
+  publicKey           String?   // hex
+  privateKeyEncrypted String?   // hex encrypted with master key (format: iv:tag:ciphertext)
+}
+
+model Job {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  budget      Float?
+  status      JobStatus     @default(OPEN)
+  companyId   String
+  company     User          @relation("CompanyJobs", fields: [companyId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  applications Application[]
+}
+
+model Application {
+  id          String        @id @default(cuid())
+  status      AppStatus     @default(PENDING)
+  freelancerId String
+  freelancer  User          @relation(fields: [freelancerId], references: [id])
+  jobId       String
+  job         Job           @relation(fields: [jobId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model SkillTest {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  testName    String
+  score       Int
+  hash        String        // SHA256(userId+testName+score+createdAt)
+  createdAt   DateTime      @default(now())
+}
+
+model Review {
+  id          String        @id @default(cuid())
+  content     String
+  reviewerId  String
+  reviewer    User          @relation("Reviewer", fields: [reviewerId], references: [id])
+  revieweeId  String
+  reviewee    User          @relation("Reviewee", fields: [revieweeId], references: [id])
+  hash        String        // SHA256(content+reviewerId+revieweeId+createdAt)
+  signature   String        // Ed25519 signature of hash
+  createdAt   DateTime      @default(now())
+  // No updatedAt – immutable!
+
+  @@unique([reviewerId, revieweeId, createdAt])
+}
+
+enum UserType {
+  FREELANCER
+  COMPANY
+}
+
+enum JobStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+enum AppStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
